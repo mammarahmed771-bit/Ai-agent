@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent</title>
+
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#10b981">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="icon" href="/static/icon-192.png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet"
+href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+
+<script src="https://js.puter.com/v2/"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-top">
+            <div class="sidebar-header">
+                <span id="close-sidebar-btn" class="material-symbols-outlined">dock_to_left</span>
+            </div>
+
+            <button class="new-chat">
+                <div class="new-chat-left">
+                    <span class="material-symbols-outlined">edit_square</span> New chat
+                </div>
+            </button>
+
+            <div class="nav-links">
+                <div class="nav-item search-box-container"
+                    style="padding: 4px 8px; background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-outlined" style="font-size: 18px; color: #676767;">search</span>
+                    <input type="text" id="sidebar-search" placeholder="Search chats..."
+                        style="background: transparent; border: none; color: white; outline: none; font-size: 13px; width: 100%;">
+                </div>
+
+                <div class="nav-item"><span class="material-symbols-outlined">auto_stories</span> Library</div>
+                <div class="nav-item"><span class="material-symbols-outlined">folder</span> Projects</div>
+
+                <div id="recents-toggle" class="recents-header">
+                    <span>Recents</span>
+                    <span class="material-symbols-outlined">expand_more</span>
+                </div>
+
+                <div id="sidebar-history-box" class="dynamic-history-container"></div>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <div class="profile-left">
+                <div class="avatar">ME</div>
+                <div class="profile-info">
+                    <div class="profile-name">My Workspace</div>
+                    <div class="profile-plan">Pro Instance</div>
+                </div>
+            </div>
+            <span class="material-symbols-outlined profile-settings-btn">settings</span>
+        </div>
+    </div>
+
+    <div class="main app-workspace-split">
+        <div class="chat-pane-column">
+            <div class="top-nav">
+                <div class="left-nav-controls">
+                    <span id="open-sidebar-btn" class="material-symbols-outlined sidebar-toggle-btn">dock_to_left</span>
+                    <div class="model-selector">
+                        <span class="material-symbols-outlined" style="color: var(--accent-color);">bolt</span>
+                        <span>Gemini 2.5 Flash (Pro Audio Mode)</span>
+                    </div>
+                </div>
+
+                <div class="right-nav-controls">
+                    <div class="nav-btn-link"><span class="material-symbols-outlined">ios_share</span> Share</div>
+                    <span class="material-symbols-outlined text-muted">more_horiz</span>
+                </div>
+            </div>
+
+            <div id="content-pane" class="content-container">
+                <div class="welcome">
+                    <h1>What's on the agenda today?</h1>
+                </div>
+
+                <div id="messages"></div>
+
+                <div class="bottom-container">
+                    <div class="input-area">
+                        <div class="input-container">
+                            <span class="material-symbols-outlined add-icon">add</span>
+                            <textarea id="prompt" placeholder="Ask anything or paste code to preview..." rows="1"
+                                autocomplete="off"></textarea>
+                            <div class="input-actions">
+                                <span id="toggle-monospace-btn" class="material-symbols-outlined mic-icon"
+                                    title="Toggle Monospace Code Mode">integration_instructions</span>
+                                <span class="material-symbols-outlined mic-icon">mic</span>
+                                <span id="send-btn" class="material-symbols-outlined voice-icon">graphic_eq</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chips-container">
+                        <button class="chip" id="manual-canvas-btn"><span
+                                class="material-symbols-outlined">open_in_new</span> Send to Canvas</button>
+
+                        <button class="chip" onclick="triggerWorkflow('explain')"><span
+                                class="material-symbols-outlined">menu_book</span> Explain Concepts</button>
+                        <button class="chip" onclick="triggerWorkflow('refactor')"><span
+                                class="material-symbols-outlined">code_blocks</span> Clean & Refactor</button>
+                        <button class="chip" onclick="triggerWorkflow('document')"><span
+                                class="material-symbols-outlined">history_edu</span> Write Documentation</button>
+                    </div>
+
+                    <div class="disclaimer-text">Console Workstation. Powered by Gemini 2.5 Flash Engine.</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="artifact-drawer" class="artifact-preview-panel">
+            <div class="artifact-panel-header">
+                <div class="artifact-meta-title">
+                    <span class="material-symbols-outlined"
+                        style="color: var(--accent-color);">integration_instructions</span>
+                    <span id="artifact-title-text">Live Output Frame Canvas</span>
+                </div>
+                <div class="artifact-window-actions">
+                    <button id="close-artifact-btn" class="artifact-close-action-trigger">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+            </div>
+            <div class="artifact-frame-body-wrapper">
+                <iframe id="artifact-sandbox-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Console Settings</h3>
+                <span id="close-modal-btn" class="material-symbols-outlined">close</span>
+            </div>
+            <div class="modal-body">
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h4>Console Workspace Profile Theme</h4>
+                        <p>Switch between custom glassmorphic environment filters layout arrays.</p>
+                    </div>
+                    <select id="theme-profile-selector"
+                        style="background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: white; padding: 6px 12px; border-radius: 6px; outline: none; font-size: 13px; cursor: pointer;">
+                        <option value="cyber-neon">Cyber Neon Grid</option>
+                        <option value="frosted-arctic">Frosted Arctic</option>
+                        <option value="obsidian-minimalist">Obsidian Minimalist</option>
+                    </select>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h4>Console Accent Color</h4>
+                        <p>Select a personalized UI focus tint for your console instance wrappers.</p>
+                    </div>
+                    <div class="color-picker-palette">
+                        <div class="color-dot" data-color="#10b981" style="background: #10b981;"></div>
+                        <div class="color-dot" data-color="#a855f7" style="background: #a855f7;"></div>
+                        <div class="color-dot" data-color="#3b82f6" style="background: #3b82f6;"></div>
+                        <div class="color-dot" data-color="#f59e0b" style="background: #f59e0b;"></div>
+                    </div>
+                </div>
+
+                <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+                    <div class="setting-info">
+                        <h4>About You</h4>
+                        <p>Introduce yourself so the engine can provide tailored workspace responses.</p>
+                    </div>
+                    <div class="preferences-input-group">
+                        <input type="text" id="user-nickname" placeholder="Nickname (What should AI call you?)">
+                        <input type="text" id="user-occupation" placeholder="Occupation">
+                        <textarea id="user-about" placeholder="Interests, values, or preferences to keep in mind..."
+                            rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+                    <div class="setting-info">
+                        <h4>Custom Instructions</h4>
+                        <p>Provide specific style guidelines, rules, or tone preferences for responses.</p>
+                    </div>
+                    <textarea id="custom-instructions"
+                        placeholder="e.g., 'Keep answers concise', 'Always format outputs cleanly with plenty of code comments'..."
+                        rows="3"></textarea>
+                </div>
+
+                <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 14px;">
+                    <div class="setting-info">
+                        <h4>Operational Key Allocation Quotas</h4>
+                        <p>Live active parameter monitoring across cluster framework arrays.</p>
+                    </div>
+                    <div id="quota-bars-container"
+                        style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 4px;"></div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h4>Environment History Data</h4>
+                        <p>Export operational chat parameters or completely wipe local storage arrays.</p>
+                    </div>
+                    <div class="action-btn-group">
+                        <button id="export-history-btn" class="secondary-btn">Export Data</button>
+                        <button id="clear-cache-btn" class="danger-btn">Delete All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="action-request-modal" class="modal-overlay" role="dialog" aria-modal="true"
+        aria-labelledby="action-request-modal-title" aria-describedby="action-request-description" aria-hidden="true">
+        <div class="modal-content" style="max-width: 560px;">
+            <div class="modal-header">
+                <h3 id="action-request-modal-title">Action Permission Required</h3>
+                <button id="close-action-request-btn" class="modal-close-btn material-symbols-outlined" type="button"
+                    aria-label="Deny action and close">close</button>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div class="setting-row" style="padding:0; border-bottom:none;">
+                        <div class="setting-info">
+                            <h4 id="action-request-type-title">Action</h4>
+                            <p id="action-request-description">Description</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button id="action-deny-btn" class="danger-btn" type="button"
+                            style="flex:1; min-width: 200px;">Deny</button>
+                        <button id="action-allow-btn" class="secondary-btn" type="button"
+                            style="flex:1; min-width: 200px; border-color: var(--accent-color); color: var(--accent-color);">Allow</button>
+                    </div>
+                    <div style="font-family: monospace; font-size: 12px; color: #676767;">
+                        Request ID: <span id="action-request-id">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dropzone-overlay" class="drag-drop-overlay">
+        <div class="dropzone-box">
+            <span class="material-symbols-outlined drag-icon-pulse">cloud_upload</span>
+            <h3>Drop your files here</h3>
+            <p>Add files directly to your private console prompt session</p>
+        </div>
+    </div>
+
+    <input type="file" id="hidden-file-input" multiple style="display: none;">
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+            navigator.serviceWorker
+                .register("/static/sw.js")
+                .then(() => {
+                    console.log("Service Worker Registered");
+                })
+                .catch((err) => {
+                    console.log("SW Error:", err);
+                });
+        });
+    }
+    </script>
+</body>
+
+</html>
