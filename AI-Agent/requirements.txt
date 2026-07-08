@@ -1,0 +1,12 @@
+flask>=3.0
+requests>=2.31
+python-dotenv>=1.0
+openai>=1.0.0
+google-genai>=2.7.0
+beautifulsoup4>=4.12
+yt-dlp>=2025.1.0
+gunicorn>=22.0
+playwright>=1.52
+Pillow>=11.0
+pyperclip>=1.9
+
